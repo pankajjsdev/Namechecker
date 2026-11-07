@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Name Check</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Devanagari:wght@700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:system-ui,sans-serif;background:#fff8e8;display:flex;justify-content:center;padding:24px 16px}
+.box{width:100%;max-width:520px}
+textarea{width:100%;box-sizing:border-box;padding:12px;font-size:18px;border:2px solid #c9a24b;border-radius:10px}
+.item{background:#fff;border:1px solid #e7d9b8;border-radius:10px;padding:10px 14px;margin-top:12px}
+.hi{font-family:"Noto Serif Devanagari",serif;font-size:34px;color:#6d1020;line-height:1.4}
+.en{font-size:20px;color:#333}
+.chip{font-family:"Noto Serif Devanagari",serif;font-size:18px;margin:4px 4px 0 0;padding:4px 12px;border:1px solid #c9a24b;border-radius:999px;background:#fff;cursor:pointer}
+.chip.on{background:#6d1020;color:#fff}
+.hint{font-size:13px;color:#777;margin:6px 0}
+</style>
+</head>
+<body>
+<div class="box">
+  <textarea id="in" rows="4" placeholder="हर लाइन में एक नाम / One name per line&#10;Rakesh Sharma&#10;Sunita Devi" autofocus></textarea>
+  <div id="live" style="min-height:40px;margin-top:6px"></div>
+  <div class="hint">गलत लगे तो नाम के नीचे सही स्पेलिंग पर टैप करो।</div>
+  <div id="out"></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dev = s => /[ऀ-ॿ]/.test(s);
+
+// Sahi spelling (pehle yahan dekhta hai, phir Google)
+const D = {};
+`aman:अमन;amit:अमित;amita:अमिता;anil:अनिल;anita:अनीता;anjali:अंजलि;ankit:अंकित;ankita:अंकिता;anuj:अनुज;anup:अनूप;arjun:अर्जुन;arun:अरुण;ashok:अशोक;ashish:आशीष;asha:आशा;deepak:दीपक;deepa:दीपा;dinesh:दिनेश;durga:दुर्गा;geeta:गीता;gita:गीता;gopal:गोपाल;govind:गोविंद;hari:हरि;harish:हरीश;himanshu:हिमांशु;jyoti:ज्योति;kailash:कैलाश;kamal:कमल;kamla:कमला;kavita:कविता;kiran:किरण;krishna:कृष्णा;kumar:कुमार;kumari:कुमारी;lakshmi:लक्ष्मी;laxmi:लक्ष्मी;lalita:ललिता;mahesh:महेश;manoj:मनोज;meena:मीना;meera:मीरा;mohan:मोहन;mukesh:मुकेश;naresh:नरेश;neha:नेहा;nitin:नितिन;om:ओम;pankaj:पंकज;pooja:पूजा;prakash:प्रकाश;pradeep:प्रदीप;priya:प्रिया;priyanka:प्रियंका;rahul:राहुल;raj:राज;rajesh:राजेश;rajendra:राजेंद्र;rakesh:राकेश;ram:राम;ramesh:रमेश;rani:रानी;ravi:रवि;rekha:रेखा;rohit:रोहित;sanjay:संजय;sanjeev:संजीव;santosh:संतोष;sarita:सरिता;savita:सविता;seema:सीमा;shanti:शांति;sharda:शारदा;shiv:शिव;shyam:श्याम;sita:सीता;sneha:स्नेहा;sonu:सोनू;sunil:सुनील;sunita:सुनीता;suresh:सुरेश;sushil:सुशील;sushma:सुषमा;suman:सुमन;vijay:विजय;vikas:विकास;vikram:विक्रम;vimal:विमल;vinod:विनोद;vishal:विशाल;vishnu:विष्णु;yogesh:योगेश;devi:देवी;singh:सिंह;sharma:शर्मा;verma:वर्मा;gupta:गुप्ता;yadav:यादव;kumawat:कुमावत;jain:जैन;agarwal:अग्रवाल;agrawal:अग्रवाल;mishra:मिश्रा;pandey:पांडेय;tiwari:तिवारी;dubey:दुबे;chauhan:चौहान;rathore:राठौड़;meena:मीणा;saini:सैनी;patel:पटेल;joshi:जोशी;bansal:बंसल;goyal:गोयल;mittal:मित्तल;kapoor:कपूर;khanna:खन्ना;mehta:मेहता;shah:शाह;thakur:ठाकुर;pandit:पंडित;lal:लाल;chand:चंद;chandra:चंद्र;prasad:प्रसाद;nath:नाथ;das:दास;rai:राय;mal:मल;ji:जी;shri:श्री;smt:श्रीमती;mr:श्री;mrs:श्रीमती;dr:डॉ.;family:परिवार`
+  .split(';').forEach(p => { const [k, v] = p.split(':'); D[k.trim()] = v.trim(); });
+
+`aakash:आकाश;aarti:आरती;abhay:अभय;abhishek:अभिषेक;aditya:आदित्य;aditi:अदिति;agam:आगम;ajay:अजय;ajit:अजीत;akash:आकाश;akhil:अखिल;akshay:अक्षय;alok:आलोक;amar:अमर;amardeep:अमरदीप;ambika:अंबिका;amrit:अमृत;amar:अमर;anand:आनंद;anchal:अंचल;anju:अंजू;anmol:अनमोल;anshul:अंशुल;anshika:अंशिका;anushka:अनुष्का;anupam:अनुपम;aparna:अपर्णा;archana:अर्चना;arti:आरती;aryan:आर्यन;aswin:अश्विन;atul:अतुल;avinash:अविनाश;ayush:आयुष;ayushi:आयुषी;babita:बबीता;baldev:बलदेव;balram:बलराम;basant:बसंत;bhagwan:भगवान;bhagwati:भगवती;bharat:भारत;bhavna:भावना;bhim:भीम;bhupendra:भूपेंद्र;bhawani:भवानी;brij:बृज;brijesh:बृजेश;chanchal:चंचल;chandan:चंदन;charan:चरण;chetan:चेतन;chhaya:छाया;chirag:चिराग;darshan:दर्शन;daya:दया;deepika:दीपिका;deepti:दीप्ति;dev:देव;devendra:देवेंद्र;dharam:धरम;dharmendra:धर्मेंद्र;dhiraj:धीरज;dilip:दिलीप;divya:दिव्या;divyansh:दिव्यांश;durgesh:दुर्गेश;ganesh:गणेश;gaurav:गौरव;gautam:गौतम;gayatri:गायत्री;girish:गिरीश;gulab:गुलाब;gunjan:गुंजन;guddu:गुड्डू;gurmeet:गुरमीत;gurpreet:गुरप्रीत;harpreet:हरप्रीत;harsh:हर्ष;harshit:हर्षित;heena:हीना;hemant:हेमंत;hema:हेमा;hemlata:हेमलता;indra:इंद्र;ishwar:ईश्वर;jagdish:जगदीश;jagdeep:जगदीप;jai:जय;jaideep:जयदीप;jaiprakash:जयप्रकाश;janki:जानकी;jaya:जया;jitendra:जितेंद्र;jitesh:जितेश;juhi:जूही;kajal:काजल;kanchan:कंचन;kanhaiya:कन्हैया;karan:करण;karishma:करिश्मा;kartik:कार्तिक;keshav:केशव;khushboo:खुशबू;kishore:किशोर;komal:कोमल;kuldeep:कुलदीप;kusum:कुसुम;lalit:ललित;lata:लता;laxman:लक्ष्मण;lokesh:लोकेश;madhu:मधु;mamta:ममता;manish:मनीष;manisha:मनीषा;manju:मंजू;manoj:मनोज;mayank:मयंक;mayur:मयूर;minakshi:मीनाक्षी;mohit:मोहित;monika:मोनिका;mridul:मृदुल;nand:नंद;nandini:नंदिनी;nanak:नानक;narayan:नारायण;narendra:नरेंद्र;naveen:नवीन;nikhil:निखिल;nilesh:नीलेश;nirmala:निर्मला;nisha:निशा;nishant:निशांत;nitu:नीतू;pallavi:पल्लवी;paras:पारस;parvati:पार्वती;pawan:पवन;poonam:पूनम;pooja:पूजा;pramod:प्रमोद;prashant:प्रशांत;pratibha:प्रतिभा;preeti:प्रीति;prem:प्रेम;pushpa:पुष्पा;pushpendra:पुष्पेंद्र;radha:राधा;raghav:राघव;raghunath:रघुनाथ;rajni:रजनी;rajkumar:राजकुमार;raju:राजू;rakhi:राखी;ramesh:रमेश;rambabu:रामबाबू;ramkishan:रामकिशन;ranjeet:रणजीत;ranjan:रंजन;rashmi:रश्मि;ratan:रतन;reena:रीना;renu:रेनू;riya:रिया;ritu:रितु;rishi:ऋषि;rishabh:ऋषभ;ritesh:रितेश;roshan:रोशन;rupa:रूपा;sachin:सचिन;sagar:सागर;sahil:साहिल;sandeep:संदीप;sangeeta:संगीता;sapna:सपना;sarvesh:सर्वेश;satish:सतीश;satyam:सत्यम;saurabh:सौरभ;shailendra:शैलेंद्र;shakuntala:शकुंतला;shalini:शालिनी;shankar:शंकर;sharad:शरद;shobha:शोभा;shreya:श्रेया;shweta:श्वेता;siddharth:सिद्धार्थ;simran:सिमरन;sonia:सोनिया;sonal:सोनल;subhash:सुभाष;sudha:सुधा;sudhir:सुधीर;sumit:सुमित;sumitra:सुमित्रा;sundar:सुंदर;surendra:सुरेंद्र;surya:सूर्या;sushant:सुशांत;swati:स्वाति;tanu:तनु;tarun:तरुण;tara:तारा;tejpal:तेजपाल;tushar:तुषार;uday:उदय;uma:उमा;umesh:उमेश;usha:उषा;varsha:वर्षा;vandana:वंदना;vasant:वसंत;ved:वेद;vibha:विभा;vidya:विद्या;vikash:विकाश;vineet:विनीत;vipin:विपिन;virender:वीरेंद्र;virendra:वीरेंद्र;vishwas:विश्वास;vivek:विवेक;yash:यश;yashpal:यशपाल;yamini:यामिनी;yuvraj:युवराज;mohammed:मोहम्मद;mohd:मोहम्मद;irfan:इरफ़ान;imran:इमरान;salman:सलमान;aamir:आमिर;amir:आमिर;farhan:फ़रहान;sameer:समीर;shahid:शाहिद;javed:जावेद;nasir:नासिर;arif:आरिफ़;rashid:राशिद;zubair:ज़ुबैर;fatima:फ़ातिमा;ayesha:आयशा;shabana:शबाना;nazia:नाज़िया;khan:ख़ान;ansari:अंसारी;qureshi:कुरैशी;siddiqui:सिद्दीकी;sheikh:शेख़;kaur:कौर;gill:गिल;sandhu:संधू;sidhu:सिद्धू;dhillon:ढिल्लों;grewal:ग्रेवाल;bajwa:बाजवा;malhotra:मल्होत्रा;arora:अरोड़ा;chopra:चोपड़ा;bhatia:भाटिया;sethi:सेठी;anand:आनंद;batra:बत्रा;kohli:कोहली;sinha:सिन्हा;jha:झा;choudhary:चौधरी;chaudhary:चौधरी;chaudhari:चौधरी;tripathi:त्रिपाठी;shukla:शुक्ला;dwivedi:द्विवेदी;trivedi:त्रिवेदी;chaturvedi:चतुर्वेदी;pathak:पाठक;upadhyay:उपाध्याय;bhatt:भट्ट;rawat:रावत;negi:नेगी;bisht:बिष्ट;gaur:गौड़;gour:गौड़;tomar:तोमर;solanki:सोलंकी;parmar:परमार;rajput:राजपूत;shekhawat:शेखावत;bhati:भाटी;rathod:राठौड़;sisodia:सिसोदिया;jangid:जांगिड़;suthar:सुथार;prajapat:प्रजापत;prajapati:प्रजापति;kumhar:कुम्हार;nai:नाई;mali:माली;gurjar:गुर्जर;jat:जाट;dhaka:ढाका;godara:गोदारा;choudhry:चौधरी;kasana:कसाना;bairwa:बैरवा;sain:सैन;lodha:लोढ़ा;soni:सोनी;maheshwari:माहेश्वरी;khandelwal:खंडेलवाल;oswal:ओसवाल;bhandari:भंडारी;nagar:नागर;naik:नायक;nayak:नायक;reddy:रेड्डी;rao:राव;iyer:अय्यर;nair:नायर;pillai:पिल्लई;menon:मेनन;desai:देसाई;patil:पाटिल;kulkarni:कुलकर्णी;deshmukh:देशमुख;pawar:पवार;jadhav:जाधव;shinde:शिंदे;more:मोरे;gaikwad:गायकवाड़;banerjee:बनर्जी;chatterjee:चटर्जी;mukherjee:मुखर्जी;ghosh:घोष;bose:बोस;sen:सेन;roy:रॉय;dutta:दत्ता;saxena:सक्सेना;srivastava:श्रीवास्तव;mathur:माथुर;kayastha:कायस्थ;bhardwaj:भारद्वाज;vashishtha:वशिष्ठ;sharan:शरण;kishan:किशन;kishan:किशन;bhai:भाई;ben:बेन;behen:बहन;bhabhi:भाभी;kaka:काका;mama:मामा;chacha:चाचा;tau:ताऊ;bua:बुआ;mausi:मौसी;nana:नाना;dada:दादा;dadi:दादी;nani:नानी;baba:बाबा;pita:पिता;mata:माता;bhaiya:भैया;didi:दीदी;jija:जीजा;saheb:साहब;sahab:साहब;ji:जी;sri:श्री;shree:श्री;late:स्व.;smt:श्रीमती;kum:कु.;kumari:कुमारी;parivar:परिवार;pariwar:परिवार;and:एवं;with:सहित`
+  .split(';').forEach(p => { const [k, v] = p.split(':'); if (k && v) D[k.trim()] = v.trim(); });
+
+const cache = {};
+async function sug(w) {
+  if (dev(w)) return [w];
+  const key = w.toLowerCase().replace(/[.,]/g, '');
+  let list = [];
+  if (!cache[key]) {
+    try {
+      const r = await fetch(`https://inputtools.google.com/request?text=${encodeURIComponent(key)}&itc=hi-t-i0-und&num=6&ie=utf-8&oe=utf-8&app=x`);
+      const j = await r.json();
+      cache[key] = j[0] === 'SUCCESS' ? j[1][0][1] : [];
+    } catch { cache[key] = []; }
+  }
+  list = cache[key].slice();
+  if (D[key]) {
+    const first = key === 'meena' ? ['मीना', 'मीणा'] : [D[key]];
+    list = [...first, ...list.filter(x => !first.includes(x))];
+  }
+  return list.length ? list : [w];
+}
+// English spelling galat ho to nearest sahi naam suggest karo
+function lev(a, b) {
+  const m = a.length, n = b.length, d = Array.from({ length: m + 1 }, (_, i) => [i]);
+  for (let j = 1; j <= n; j++) d[0][j] = j;
+  for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
+    d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+  return d[m][n];
+}
+const skel = s => s.replace(/[aeiouyh]/g, '').replace(/(.)\1+/g, '$1').replace(/w/g, 'v').replace(/[ck]/g, 'k');
+function near(w) {
+  const k = w.toLowerCase().replace(/[^a-z]/g, '');
+  if (k.length < 3 || D[k]) return [];
+  const lim = k.length <= 5 ? 1 : 2;
+  return Object.keys(D).map(x => ({ x, d: lev(k, x), s: skel(k) && skel(k) === skel(x) }))
+    .filter(o => o.d <= lim || (o.s && o.d <= 3))
+    .sort((a, b) => a.d - b.d).slice(0, 3).map(o => o.x);
+}
+const cap = s => s.split(/\s+/).map(w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w).join(' ');
+
+// Typing ke time suggestion
+function liveSuggest() {
+  const ta = $('in'), pos = ta.selectionStart, txt = ta.value;
+  const start = Math.max(txt.lastIndexOf(' ', pos - 1), txt.lastIndexOf('\n', pos - 1)) + 1;
+  const part = txt.slice(start, pos);
+  const key = part.toLowerCase().replace(/[^a-z]/g, '');
+  const box = $('live'); box.innerHTML = '';
+  if (key.length < 2 || dev(part)) return;
+  let list = Object.keys(D).filter(k => k.startsWith(key) && k !== key);
+  if (D[key]) list.unshift(key);
+  if (list.length < 3) list = list.concat(near(key).filter(x => !list.includes(x)));
+  list.slice(0, 8).forEach(k => {
+    const b = document.createElement('button'); b.className = 'chip'; b.style.fontFamily = 'inherit';
+    b.innerHTML = `${cap(k)} <small style="font-family:'Noto Serif Devanagari'">${D[k]}</small>`;
+    b.onmousedown = e => e.preventDefault();
+    b.onclick = () => {
+      ta.value = txt.slice(0, start) + cap(k) + ' ' + txt.slice(pos);
+      const np = start + k.length + 1; ta.focus(); ta.setSelectionRange(np, np);
+      box.innerHTML = ''; run();
+    };
+    box.appendChild(b);
+  });
+}
+let t;
+$('in').oninput = () => { liveSuggest(); clearTimeout(t); t = setTimeout(run, 350); };
+$('in').onclick = $('in').onkeyup = e => { if (!/^(Arrow|Home|End)/.test(e.key || 'Arrow')) return; liveSuggest(); };
+async function run() {
+  const out = $('out'); out.innerHTML = '';
+  const lines = $('in').value.split('\n').map(s => s.trim()).filter(Boolean);
+  for (const line of lines) {
+    const words = line.split(/\s+/);
+    const lists = await Promise.all(words.map(sug));
+    const pick = words.map(() => 0);
+    const el = document.createElement('div'); el.className = 'item';
+    const render = () => {
+      el.innerHTML = '';
+      const h = document.createElement('div'); h.className = 'hi';
+      h.textContent = lists.map((l, i) => l[pick[i]]).join(' ');
+      el.appendChild(h);
+      if (!dev(line)) { const e = document.createElement('div'); e.className = 'en'; e.textContent = cap(words.join(' ')); el.appendChild(e); }
+      words.forEach((w, i) => {
+        const n = dev(w) ? [] : near(w);
+        if (!n.length) return;
+        const r = document.createElement('div'); r.className = 'hint';
+        r.append('क्या मतलब था (Did you mean)? ');
+        n.forEach(x => {
+          const b = document.createElement('button'); b.className = 'chip'; b.style.fontFamily = 'inherit';
+          b.textContent = cap(x);
+          b.onclick = async () => { words[i] = x; lists[i] = await sug(x); pick[i] = 0; render(); };
+          r.appendChild(b);
+        });
+        el.appendChild(r);
+      });
+      lists.forEach((l, i) => {
+        if (l.length < 2) return;
+        const r = document.createElement('div');
+        l.forEach((x, j) => {
+          const b = document.createElement('button');
+          b.className = 'chip' + (pick[i] === j ? ' on' : ''); b.textContent = x;
+          b.onclick = () => { pick[i] = j; render(); };
+          r.appendChild(b);
+        });
+        el.appendChild(r);
+      });
+    };
+    render(); out.appendChild(el);
+  }
+}
+</script>
+</body>
+</html>
